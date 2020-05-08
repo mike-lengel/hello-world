@@ -56,7 +56,7 @@ def dataDownload(tickerList,startDate,endDate):
     dataDownloaded={}
     for tick in tickerList:
         print("Starting dowload for " +tick)
-        dataDownloaded[tick]=yfinance.download(tick,start=startDate,end=endDate, auto_adjust=True,prepost=True)
+        dataDownloaded[tick]=yfinance.download(tick,start=startDate,end=endDate, auto_adjust=True)
     print("All downloads complete!")
     return dataDownloaded
 
@@ -74,13 +74,13 @@ def insertTickerDataToDB(dbName,data):
     print("Done inserting data for all tickers...")
 
 
-dbName = "tickerData.db"
+dbName = "tickerDataWithoutPrePost.db"
 startDate = "2000-01-01"
-endDate = "2020-05-06"
-tickerList = ["AAPL","AMZN","BABA","BIDU","C","CMG","CSCO","DIS","EEM","EWW","EWZ","FB","FXI","GDX","GDXJ","GLD","GOOG","GS","IBM","IWM","MSFT","NFLX","SBUX","SLV","SNAP","TLT","TSLA","TWTR","USO","UVXY","VIX","XLE","XLU","XOP","JNUG","NOBL","SPHD","VOO","KO","F","BA","PTON","ROKU","SQ","AAL","ADNT","AMD","AVGO","BYND","CAT","COF","DD","DE","GM","GOOGL","HD","JPM","LOW","M","MCD","MMM","NVDA","ORCL","PG","QCOM","SHOP","TGT","UBER","V","VFC","WMT","X","XOM"]
+endDate = "2020-05-08"
+tickerList = ["SPY","DIA","QQQ","AAPL","AMZN","BABA","BIDU","C","CMG","CSCO","DIS","EEM","EWW","EWZ","FB","FXI","GDX","GDXJ","GLD","GOOG","GS","IBM","IWM","MSFT","NFLX","SBUX","SLV","SNAP","TLT","TSLA","TWTR","USO","UVXY","VIX","XLE","XLU","XOP","JNUG","NOBL","SPHD","VOO","KO","F","BA","PTON","ROKU","SQ","AAL","ADNT","AMD","AVGO","BYND","CAT","COF","DD","DE","GM","GOOGL","HD","JPM","LOW","M","MCD","MMM","NVDA","ORCL","PG","QCOM","SHOP","TGT","UBER","V","VFC","WMT","X","XOM"]
 #tickerList = ["SPY","DIA","QQQ"]
 
-#initializeDB(dbName)
+initializeDB(dbName)
 d = dataDownload(tickerList,startDate,endDate)
 insertTickerDataToDB(dbName,d)
 
