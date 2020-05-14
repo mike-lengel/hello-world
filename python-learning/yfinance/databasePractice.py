@@ -29,14 +29,21 @@ for row in query2:
 
 def createExcelWithPriceMoves(ticker,conn,startDate,endDate):
     c = conn.cursor()
-    query = c.execute("SELECT TickerSymbol, TradeDate, Close FROM prices WHERE TickerSymbol = ? AND TradeDate >= ? AND TradeDate <= ? ORDER BY TradeDate",(ticker,startDate,endDate))
-
+    d = conn.cursor()
+    e = conn.cursor()
+    query = c.execute("SELECT TickerSymbol, TradeDate, Close, High, Low FROM prices WHERE TickerSymbol = ? AND TradeDate >= ? AND TradeDate <= ? ORDER BY TradeDate",(ticker,startDate,endDate))
+    tempMax = list(d.execute("SELECT max(High) FROM prices WHERE TickerSymbol = ? AND TradeDate >= ? AND TradeDate <= ? ",(ticker,startDate,endDate)))
+    maxValue = tempMax[0][0]
+    print(maxValue)
+    tempMin = list(e.execute("SELECT min(Low) FROM prices WHERE TickerSymbol = ? AND TradeDate >= ? AND TradeDate <= ? ",(ticker,startDate,endDate)))
+    minValue = tempMin[0][0]
+    print(minValue)
     excelFileName = "Stock Movement Summary - "+ticker+" from "+startDate+" to "+endDate+".xlsx"
     workbook = xlsxwriter.Workbook(excelFileName)
     worksheet = workbook.add_worksheet(ticker)
 
     worksheet.write_row("A1",["Price Movement for "+ticker+" from "+startDate+" to "+endDate])
-    worksheet.write_row("A2",["Stock","Trade Date","Closing Price"])
+    worksheet.write_row("A2",["Stock","Trade Date","Closing Price", "High", "Low"])
     lineNum = 3
 
     for row in query:
@@ -48,11 +55,30 @@ def createExcelWithPriceMoves(ticker,conn,startDate,endDate):
     chart1.add_series({
         'categories' : '='+ticker+'!$B$3:$B$' + str(lineNum),
         'values' : '='+ticker+'!$C$3:$C$'+str(lineNum),
-        'name' : '='+ticker
+        'name' : '='+ticker+' Close'
         })
+    chart1.add_series({
+        'categories' : '='+ticker+'!$B$3:$B$' + str(lineNum),
+        'values' : '='+ticker+'!$D$3:$D$'+str(lineNum),
+        'name' : '='+ticker+' High'
+        })
+    chart1.add_series({
+        'categories' : '='+ticker+'!$B$3:$B$' + str(lineNum),
+        'values' : '='+ticker+'!$E$3:$E$'+str(lineNum),
+        'name' : '='+ticker
+        })    
     chart1.set_title({'name' : 'Movement of Ticker Price from '+startDate+' to '+endDate})
-    chart1.set_x_axis({'name' : 'Trade Date'})
-    chart1.set_y_axis({'name' : 'Closing Price (USD)'})
+    chart1.set_x_axis({
+        'name' : 'Trade Date',
+        'date_axis' : True,
+        'major_unit_type' : 'months',
+        'minor_unit_type' : 'weeks'
+        })
+    chart1.set_y_axis({
+        'name' : 'Price (USD)',
+        'min' : minValue,
+        'max' : maxValue
+        })
 
     worksheet.insert_chart('F2',chart1,{
         'x_offset':25, 
