@@ -48,7 +48,7 @@ def initializeDB(dbName):
     c = conn.cursor()
 
     #Create table
-    c.execute("CREATE TABLE prices (TICKERSYMBOL text, TRADEDATE datetime, OPEN real, HIGH real, LOW real, CLOSE real, VOLUME real, PRIMARY KEY (TICKERSYMBOL, TRADEDATE))")
+    c.execute("CREATE TABLE prices (TICKERSYMBOL text, TRADEDATE datetime, OPEN real, HIGH real, LOW real, CLOSE real, VOLUME real, DIVIDENDS real, SPLITS real,     PRIMARY KEY (TICKERSYMBOL, TRADEDATE))")
     conn.commit()
     
 
@@ -56,7 +56,7 @@ def dataDownload(tickerList,startDate,endDate):
     dataDownloaded={}
     for tick in tickerList:
         print("Starting dowload for " +tick)
-        dataDownloaded[tick]=yfinance.download(tick,start=startDate,end=endDate, auto_adjust=True)
+        dataDownloaded[tick]=yfinance.Ticker(tick).history(start=startDate,end=endDate, auto_adjust=True, actions=True)
     print("All downloads complete!")
     return dataDownloaded
 
@@ -66,21 +66,21 @@ def insertTickerDataToDB(dbName,data):
     for ticker in data.keys():
         print("Starting insert for: "+ticker+"\n")
         for row in data[ticker].itertuples():
-            oneRow = [str(ticker), str(row[0]), float(row[1]), float(row[2]), float(row[3]), float(row[4]), float(row[5])]
-            c.execute("INSERT INTO prices VALUES (?,?,?,?,?,?,?)",oneRow)
+            oneRow = [str(ticker), str(row[0]), float(row[1]), float(row[2]), float(row[3]), float(row[4]), float(row[5]), float(row[6]), float(row[7])]
+            c.execute("INSERT INTO prices VALUES (?,?,?,?,?,?,?,?,?)",oneRow)
             print(oneRow)
         print("Done with: "+ticker+"\n")
     conn.commit()
     print("Done inserting data for all tickers...")
 
 
-dbName = "tickerDataWithoutPrePost.db"
-startDate = "2000-01-01"
-endDate = "2020-05-08"
-tickerList = ["SPY","DIA","QQQ","AAPL","AMZN","BABA","BIDU","C","CMG","CSCO","DIS","EEM","EWW","EWZ","FB","FXI","GDX","GDXJ","GLD","GOOG","GS","IBM","IWM","MSFT","NFLX","SBUX","SLV","SNAP","TLT","TSLA","TWTR","USO","UVXY","VIX","XLE","XLU","XOP","JNUG","NOBL","SPHD","VOO","KO","F","BA","PTON","ROKU","SQ","AAL","ADNT","AMD","AVGO","BYND","CAT","COF","DD","DE","GM","GOOGL","HD","JPM","LOW","M","MCD","MMM","NVDA","ORCL","PG","QCOM","SHOP","TGT","UBER","V","VFC","WMT","X","XOM"]
-#tickerList = ["SPY","DIA","QQQ"]
+dbName = "tickerDataWithActions.db"
+startDate = "1980-01-01"
+endDate = "2020-05-14"
+#tickerList = ["SPY","DIA","QQQ","AAPL","AMZN","BABA","BIDU","C","CMG","CSCO","DIS","EEM","EWW","EWZ","FB","FXI","GDX","GDXJ","GLD","GOOG","GS","IBM","IWM","MSFT","NFLX","SBUX","SLV","SNAP","TLT","TSLA","TWTR","USO","UVXY","VIX","XLE","XLU","XOP","JNUG","NOBL","SPHD","VOO","KO","F","BA","PTON","ROKU","SQ","AAL","ADNT","AMD","AVGO","BYND","CAT","COF","DD","DE","GM","GOOGL","HD","JPM","LOW","M","MCD","MMM","NVDA","ORCL","PG","QCOM","SHOP","TGT","UBER","V","VFC","WMT","X","XOM"]
+tickerList = ["SPY","DIA","QQQ","KO","DIS","MMM"]
 
-initializeDB(dbName)
+#initializeDB(dbName)
 d = dataDownload(tickerList,startDate,endDate)
 insertTickerDataToDB(dbName,d)
 
